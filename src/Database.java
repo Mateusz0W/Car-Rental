@@ -17,7 +17,7 @@ public class Database {
     }
     public void insert(Entity entity){
         Object []data=entity.getData();
-        String query = "INSERT INTO " + entity.getTable() + " (" + entity.getColumns() + ") VALUES (" + String.join(", ", java.util.Collections.nCopies(data.length, "?")) + ")";
+        String query = "INSERT INTO " + entity.getTable() + " (" + entity.insertColumns() + ") VALUES (" + String.join(", ", java.util.Collections.nCopies(data.length, "?")) + ")";
         try (PreparedStatement pst = this.connection.prepareStatement(query)) {
             for (int i = 0; i < data.length; i++) {
                 if (data[i] instanceof Integer) {
@@ -47,7 +47,7 @@ public class Database {
     }
     public ArrayList<ArrayList<String>> read(Entity entity){
         ArrayList<ArrayList<String>> result = new ArrayList<>();
-        String columns= entity.getColumns();
+        String columns= entity.readColumns();
         String query = "SELECT " + columns + " FROM " + entity.getTable();
         String[] columnArray = columns.split(",\\s*");
         try (PreparedStatement pst = this.connection.prepareStatement(query); 
@@ -56,11 +56,11 @@ public class Database {
             while (rs.next()) {
                 ArrayList<String> row=new ArrayList<>();
                 for (String column : columnArray) {
-                    //System.out.print(rs.getString(column.trim()) + " "); 
+                    System.out.print(rs.getString(column.trim()) + " "); 
                     row.add(rs.getString(column.trim()));
                 }
                 result.add(row);
-                //System.out.println();
+                System.out.println();
             }
         } catch (SQLException e) {
             System.out.println("Error reading data");
