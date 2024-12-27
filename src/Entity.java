@@ -1,5 +1,6 @@
 interface Entity {
-    String getColumns();
+    String insertColumns();
+    String readColumns();
     String getTable();
     Object []getData();
 }
