@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.sql.Types;
+import java.time.LocalDate;
 
 public class Database {
     private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
@@ -26,13 +28,16 @@ public class Database {
                     pst.setFloat(i + 1, (Float) data[i]);
                 } else if (data[i] instanceof Double) {
                     pst.setDouble(i + 1, (Double) data[i]);
-                } else if (data[i] instanceof java.sql.Date) {
-                    pst.setDate(i + 1, (java.sql.Date) data[i]);
+                } else if (data[i] instanceof LocalDate) {
+                    pst.setDate(i + 1, java.sql.Date.valueOf((LocalDate) data[i]));
                 } else if (data[i] instanceof java.sql.Timestamp) {
                     pst.setTimestamp(i + 1, (java.sql.Timestamp) data[i]);
                 } else if (data[i] instanceof Boolean) {
                     pst.setBoolean(i + 1, (Boolean) data[i]);
-                } else {
+                } else if (data[i] instanceof InsuranceType){
+                    pst.setObject(i + 1, data[i].toString(), Types.OTHER);
+                }
+                 else {
                     pst.setString(i + 1, data[i].toString());
                 }
                 
