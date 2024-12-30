@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -17,8 +18,11 @@ public class ClientApp extends Application {
     private Database database = new Database();
     private ObservableList<Client> clientList = FXCollections.observableArrayList();
     private ObservableList<Car> carList = FXCollections.observableArrayList();
+    private ObservableList<Service> serviceList = FXCollections.observableArrayList();
     private TableView<Client> clientTableView = new TableView<>();
     private TableView<Car> carTableView = new TableView<>();
+    private TableView<Service> serviceTableView = new TableView<>();
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -29,12 +33,14 @@ public class ClientApp extends Application {
         TabPane tabPane = new TabPane();
         Tab clientTab = new Tab("Klient", createClientForm());
         Tab carTab = new Tab("Samochód", createCarForm());
+        Tab serviceTab = new Tab("Serwis", createServiceForm());
 
         // Ensure tabs are closable only programmatically
         clientTab.setClosable(false);
         carTab.setClosable(false);
+        serviceTab.setClosable(false);
 
-        tabPane.getTabs().addAll(clientTab, carTab);
+        tabPane.getTabs().addAll(clientTab, carTab,serviceTab);
 
         // Layout
         VBox layout = new VBox(10);
@@ -259,7 +265,7 @@ public class ClientApp extends Application {
                 ArrayList<ArrayList<String>> rows = database.read(new Car()); // Dummy car to fetch data
             
                 for (ArrayList<String> row : rows) {
-                    if (row.size() == 8) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                    if (row.size() == 9) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
                         Car car = new Car(row.get(0),
                          row.get(1), 
                          row.get(2), 
@@ -267,7 +273,8 @@ public class ClientApp extends Application {
                          row.get(4),
                          Integer.parseInt( row.get(5)),
                          row.get(6),
-                         Double.parseDouble(row.get(7))
+                         Double.parseDouble(row.get(7)),
+                         Integer.parseInt(row.get(8))
                         );
                         carList.add(car);
                     }
@@ -279,4 +286,124 @@ public class ClientApp extends Application {
         });
         return carLayout;
     }
+
+    // Create form and table for service
+    private VBox createServiceForm() {
+        GridPane form = new GridPane();
+        form.setPadding(new Insets(10));
+        form.setHgap(10);
+        form.setVgap(10);
+
+        Label carLabel = new Label("Car:");
+        ComboBox<Car> carComboBox = new ComboBox<>();
+        ComboBox<Service> serviceComboBox = new ComboBox<>();
+        Label serviceLabel = new Label("Service");
+        carComboBox.setItems(carList); // Populate ComboBox with the car list
+        serviceComboBox.setItems(serviceList);
+
+
+        Label descriptionLabel = new Label("opis:");
+        TextField descriptionField = new TextField();
+        Label costLabel = new Label("koszt serwisu:");
+        TextField costField = new TextField();
+        Button addButton = new Button("Add car to service");
+        Button deleteButton = new Button("Delete car from service");
+        
+
+        form.add(carLabel, 0, 0);
+        form.add(carComboBox, 1, 0);
+        form.add(descriptionLabel, 0, 1);
+        form.add(descriptionField, 1, 1);
+        form.add(costLabel, 0, 2);
+        form.add(costField, 1, 2);
+        form.add(addButton,0,3);
+        form.add(serviceLabel,9,0);
+        form.add(serviceComboBox,10,0);
+        form.add(deleteButton,10,1);
+
+        // Table for displaying car in service
+        TableColumn<Service, String> brandColumn = new TableColumn<>("Marka");
+        brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
+
+        TableColumn<Service, String> modelColumn = new TableColumn<>("Model");
+        modelColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().model));
+
+        TableColumn<Service, Integer> yearColumn = new TableColumn<>("rok");
+        yearColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().year));
+
+        TableColumn<Service, String> descriptionColumn = new TableColumn<>("Opis");
+        descriptionColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().description));
+
+        TableColumn<Service, Double> costColumn = new TableColumn<>("koszt");
+        costColumn.setCellValueFactory(data ->new javafx.beans.property.SimpleDoubleProperty(data.getValue().cost).asObject());
+
+        serviceTableView.getColumns().addAll(brandColumn, modelColumn, yearColumn, descriptionColumn,costColumn);
+        serviceTableView.setItems(serviceList);
+
+        addButton.setOnAction(e -> {
+            Car selectedCar = carComboBox.getValue();
+            String description = descriptionField.getText();
+            String cost = costField.getText();
+          
+
+            if (selectedCar != null && !description.isEmpty() && !cost.isEmpty() ) {
+                Service service = new Service(selectedCar.id,description,Double.parseDouble(cost));
+                try (Connection conn = database.connect()) {
+                    database.insert(service);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                serviceList.add(service);
+
+                carComboBox.getSelectionModel().clearSelection();
+                descriptionField.clear();
+                costField.clear();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                alert.showAndWait();
+            }
+        });
+
+        Button refreshButton = new Button("Refresh Service");
+        VBox serviceLayout = new VBox(10);
+        serviceLayout.setPadding(new Insets(10));
+        serviceLayout.getChildren().addAll(form, refreshButton, serviceTableView);
+        
+        refreshButton.setOnAction(e -> {
+            serviceList.clear();
+            try (Connection conn = database.connect()) {
+                System.out.println("Connected to database!");
+                ArrayList<ArrayList<String>> rows = database.read(new Service()); // Dummy service to fetch data
+                for (ArrayList<String> row : rows) {
+                    if (row.size() == 6) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                        Service service = new Service(row.get(0), row.get(1),Integer.parseInt( row.get(2)), row.get(3),Double.parseDouble( row.get(4)),Integer.parseInt(row.get(5)));
+                        serviceList.add(service);
+                    }
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+            
+        });
+        deleteButton.setOnAction(e->{
+            Service selectedCar = serviceComboBox.getValue();
+            System.out.println(selectedCar.car_id+" "+selectedCar.brand);
+            if(selectedCar != null){
+                try (Connection conn = database.connect()) {
+                    database.delate(selectedCar);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                serviceList.remove(selectedCar);
+
+                serviceComboBox.getSelectionModel().clearSelection();
+            }
+            else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                alert.showAndWait();
+            }
+        });
+        return serviceLayout;
+    }
+
 }
