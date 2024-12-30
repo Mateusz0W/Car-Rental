@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import javafx.application.Application;
@@ -10,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -19,10 +21,14 @@ public class ClientApp extends Application {
     private ObservableList<Client> clientList = FXCollections.observableArrayList();
     private ObservableList<Car> carList = FXCollections.observableArrayList();
     private ObservableList<Service> serviceList = FXCollections.observableArrayList();
+    private ObservableList<Insurance> insuranceList = FXCollections.observableArrayList();
+    private ObservableList<Opinion> opinionList = FXCollections.observableArrayList();
+
     private TableView<Client> clientTableView = new TableView<>();
     private TableView<Car> carTableView = new TableView<>();
     private TableView<Service> serviceTableView = new TableView<>();
-
+    private TableView<Insurance> insuranceTableView = new TableView<>();
+    private TableView<Opinion> opinionTableView = new TableView<>();
 
     @Override
     public void start(Stage primaryStage) {
@@ -34,13 +40,17 @@ public class ClientApp extends Application {
         Tab clientTab = new Tab("Klient", createClientForm());
         Tab carTab = new Tab("Samochód", createCarForm());
         Tab serviceTab = new Tab("Serwis", createServiceForm());
+        Tab insuranceTab = new Tab("Ubezpieczenia", createInsuranceForm());
+        Tab opinionTab = new Tab("Opinie", createOpinionForm());
 
         // Ensure tabs are closable only programmatically
         clientTab.setClosable(false);
         carTab.setClosable(false);
         serviceTab.setClosable(false);
+        insuranceTab.setClosable(false);
+        opinionTab.setClosable(false);
 
-        tabPane.getTabs().addAll(clientTab, carTab,serviceTab);
+        tabPane.getTabs().addAll(clientTab, carTab,serviceTab,insuranceTab,opinionTab);
 
         // Layout
         VBox layout = new VBox(10);
@@ -128,11 +138,11 @@ public class ClientApp extends Application {
             clientList.clear();
             try (Connection conn = database.connect()) {
                 System.out.println("Connected to database!");
-                ArrayList<ArrayList<String>> rows = database.read(new Client("", "", "", "")); // Dummy client to fetch data
+                ArrayList<ArrayList<String>> rows = database.read(new Client()); // Dummy client to fetch data
             
                 for (ArrayList<String> row : rows) {
-                    if (row.size() == 4) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
-                        Client client = new Client(row.get(0), row.get(1), row.get(2), row.get(3));
+                    if (row.size() == 5) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                        Client client = new Client(row.get(0), row.get(1), row.get(2), row.get(3),Integer.parseInt(row.get(4)));
                         clientList.add(client);
                     }
                 }
@@ -387,7 +397,6 @@ public class ClientApp extends Application {
         });
         deleteButton.setOnAction(e->{
             Service selectedCar = serviceComboBox.getValue();
-            System.out.println(selectedCar.car_id+" "+selectedCar.brand);
             if(selectedCar != null){
                 try (Connection conn = database.connect()) {
                     database.delate(selectedCar);
@@ -405,5 +414,271 @@ public class ClientApp extends Application {
         });
         return serviceLayout;
     }
+    // Create form and table for insurance
+    private VBox createInsuranceForm() {
+        GridPane form = new GridPane();
+        form.setPadding(new Insets(10));
+        form.setHgap(10);
+        form.setVgap(10);
+
+        Label carLabel = new Label("Car:");
+        ComboBox<Car> carComboBox = new ComboBox<>();
+        carComboBox.setItems(carList); // Populate ComboBox with the car list
+      
+
+
+        Label typeLabel = new Label("Rodzaj:");
+        ComboBox<String> typeComboBox = new ComboBox<>();
+        typeComboBox.getItems().addAll("OC", "AC", "Assistance", "Full");
+        typeComboBox.setPromptText("Wybierz rodzaj");
+        Label startDateLabel = new Label("Data rozpoczęcia:");
+        DatePicker startDatePicker = new DatePicker();
+        Label endDateLabel = new Label("Data zakończenia:");
+        DatePicker endDatePicker = new DatePicker();
+        Label costLabel = new Label("koszt:");
+        TextField costField = new TextField();
+        Label companyLabel = new Label("firma:");
+        TextField companyField = new TextField();
+        Button addButton = new Button("Buy insurance for car");
+        
+        
+
+        form.add(carLabel, 0, 0);
+        form.add(carComboBox, 1, 0);
+        form.add(typeLabel, 0, 1);
+        form.add(typeComboBox, 1, 1);
+        form.add(startDateLabel,0,2);
+        form.add(startDatePicker,1,2);
+        form.add(endDateLabel,0,3);
+        form.add(endDatePicker,1,3);
+        form.add(costLabel, 0, 4);
+        form.add(costField, 1, 4);
+        form.add(companyLabel,0,5);
+        form.add(companyField,1,5);
+        form.add(addButton,0,6);
+       
+
+        TableColumn<Insurance, String> brandColumn = new TableColumn<>("Marka");
+        brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
+
+        TableColumn<Insurance, String> modelColumn = new TableColumn<>("Model");
+        modelColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().model));
+
+        TableColumn<Insurance, String> registrationNumberColumn = new TableColumn<>("nr rejestracyjny");
+        registrationNumberColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().registration_number));
+
+        TableColumn<Insurance, LocalDate> startDateColumn = new TableColumn<>("Data rozpoczęcia");
+        startDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().start_date));
+
+        TableColumn<Insurance, LocalDate> endDateColumn = new TableColumn<>("Data zakończenia");
+        endDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().end_date));
+
+        TableColumn<Insurance, Double> costColumn = new TableColumn<>("koszt");
+        costColumn.setCellValueFactory(data ->new javafx.beans.property.SimpleDoubleProperty(data.getValue().cost).asObject());
+
+        TableColumn<Insurance, String> companyColumn = new TableColumn<>("firma");
+        companyColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().company));
+
+        insuranceTableView.getColumns().addAll(brandColumn, modelColumn, registrationNumberColumn, startDateColumn, endDateColumn,costColumn,companyColumn);
+        insuranceTableView.setItems(insuranceList);
+
+        addButton.setOnAction(e -> {
+            Car selectedCar = carComboBox.getValue();
+            String type = typeComboBox.getValue();
+            LocalDate startDate= startDatePicker.getValue();
+            LocalDate endDate = endDatePicker.getValue();
+            String cost = costField.getText();
+            String company =companyField.getText();
+          
+
+            if (selectedCar != null && type!=null && startDate != null && endDate != null &&!cost.isEmpty() && !company.isEmpty() ) {
+                Insurance insurance = new Insurance(selectedCar.id,InsuranceType.valueOf(type),startDate,endDate,Double.parseDouble(cost),company);
+                try (Connection conn = database.connect()) {
+                    database.insert(insurance);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                insuranceList.add(insurance);
+
+                carComboBox.getSelectionModel().clearSelection();
+                typeComboBox.getSelectionModel().clearSelection();
+                startDatePicker.setValue(null);
+                endDatePicker.setValue(null);
+                costField.clear();
+                companyField.clear();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                alert.showAndWait();
+            }
+        });
+
+        Button refreshButton = new Button("Refresh Insurance");
+        VBox insuranceLayout = new VBox(10);
+        insuranceLayout.setPadding(new Insets(10));
+        insuranceLayout.getChildren().addAll(form, refreshButton, insuranceTableView);
+        
+        refreshButton.setOnAction(e -> {
+            insuranceList.clear();
+            try (Connection conn = database.connect()) {
+                System.out.println("Connected to database!");
+                ArrayList<ArrayList<String>> rows = database.read(new Insurance()); // Dummy insurance to fetch data
+                for (ArrayList<String> row : rows) {
+                    if (row.size() == 8) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                        Insurance insurance = new Insurance(row.get(0), row.get(1),row.get(2),LocalDate.parse(row.get(3)),LocalDate.parse(row.get(4)),InsuranceType.valueOf( row.get(5)),Double.parseDouble( row.get(6)),row.get(7));
+                        insuranceList.add(insurance);
+                    }
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+            
+        });/* 
+        deleteButton.setOnAction(e->{
+            Service selectedCar = serviceComboBox.getValue();
+            if(selectedCar != null){
+                try (Connection conn = database.connect()) {
+                    database.delate(selectedCar);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                serviceList.remove(selectedCar);
+
+                serviceComboBox.getSelectionModel().clearSelection();
+            }
+            else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                alert.showAndWait();
+            }
+        });*/
+        return insuranceLayout;
+    }
+        // Create form and table for opinion
+        private VBox createOpinionForm() {
+            GridPane form = new GridPane();
+            form.setPadding(new Insets(10));
+            form.setHgap(10);
+            form.setVgap(10);
+    
+            Label carLabel = new Label("Car:");
+            ComboBox<Car> carComboBox = new ComboBox<>();
+            carComboBox.setItems(carList); // Populate ComboBox with the car list
+            carComboBox.setPromptText("Wybierz samochód");
+            Label clientLabel = new Label("Klient:");
+            ComboBox<Client> clientComboBox = new ComboBox<>();
+            clientComboBox.setItems(clientList); 
+            clientComboBox.setPromptText("wybierz klienta");
+            Label opinionLabel = new Label("Opinia:");
+            TextArea opinionField = new TextArea();
+            opinionField.setPromptText("Wpisz opinie");
+            Button addButton = new Button("Dodaj opinie");
+
+            Label gradeLabel = new Label("Ocena:");
+            ComboBox<Integer> gradeComboBox = new ComboBox<>();
+            gradeComboBox.getItems().addAll(1,2,3,4,5);
+            gradeComboBox.setPromptText("wybierz ocene");
+    
+            form.add(carLabel, 0, 0);
+            form.add(carComboBox, 1, 0);
+            form.add(clientLabel, 0, 1);
+            form.add(clientComboBox, 1, 1);
+            form.add(opinionLabel,0,2);
+            form.add(opinionField,1,2);
+            form.add(gradeLabel,0,3);
+            form.add(gradeComboBox,1,3);
+            form.add(addButton,0,4);
+    
+            TableColumn<Opinion, String> brandColumn = new TableColumn<>("Marka");
+            brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
+    
+            TableColumn<Opinion, String> modelColumn = new TableColumn<>("Model");
+            modelColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().model));
+    
+            TableColumn<Opinion, String> categoryColumn = new TableColumn<>("Kategoria");
+            categoryColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().category));
+            
+            TableColumn<Opinion, String> nameColumn = new TableColumn<>("Imie");
+            nameColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().name));
+
+            TableColumn<Opinion, String> surnameColumn = new TableColumn<>("Nazwisko");
+            surnameColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().surname));
+            
+            TableColumn<Opinion, Integer> gradeColumn = new TableColumn<>("Ocena");
+            gradeColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().grade));
+
+            TableColumn<Opinion, String> opinionColumn = new TableColumn<>("Opinia");
+            opinionColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().opinion));
+
+            TableColumn<Opinion, LocalDate> dateColumn = new TableColumn<>("Data wystawienia");
+            dateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().date));
+    
+           
+            opinionTableView.getColumns().addAll(brandColumn, modelColumn, categoryColumn, nameColumn, surnameColumn,gradeColumn,opinionColumn,dateColumn);
+            opinionTableView.setItems(opinionList);
+    
+            addButton.setOnAction(e -> {
+                Car selectedCar = carComboBox.getValue();
+                Client selectedClient = clientComboBox.getValue();
+                String clientOpinon = opinionField.getText();
+                LocalDate currentDate = LocalDate.now();
+                int selectedGrade = gradeComboBox.getValue();
+    
+                if (selectedCar != null && selectedClient!=null && !clientOpinon.isEmpty() && currentDate != null  ) {
+                    Opinion opinion = new Opinion(selectedClient.id,selectedCar.id,clientOpinon,selectedGrade,currentDate);
+                    try (Connection conn = database.connect()) {
+                        database.insert(opinion);
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                    opinionList.add(opinion);
+    
+                    carComboBox.getSelectionModel().clearSelection();
+                    clientComboBox.getSelectionModel().clearSelection();
+                    opinionField.clear();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                    alert.showAndWait();
+                }
+            });
+    
+            Button refreshButton = new Button("Refresh Insurance");
+            VBox opinionLayout = new VBox(10);
+            opinionLayout.setPadding(new Insets(10));
+            opinionLayout.getChildren().addAll(form, refreshButton, opinionTableView);
+            
+            refreshButton.setOnAction(e -> {
+                opinionList.clear();
+                try (Connection conn = database.connect()) {
+                    System.out.println("Connected to database!");
+                    ArrayList<ArrayList<String>> rows = database.read(new Opinion()); // Dummy insurance to fetch data
+                    for (ArrayList<String> row : rows) {
+                        if (row.size() == 8) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                            Opinion opinion = new Opinion(row.get(0), row.get(1),row.get(2),row.get(3),row.get(4),Integer.parseInt( row.get(5)),row.get(6),LocalDate.parse(row.get(7)));
+                            opinionList.add(opinion);
+                        }
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                
+            });/* 
+            deleteButton.setOnAction(e->{
+                Service selectedCar = serviceComboBox.getValue();
+                if(selectedCar != null){
+                    try (Connection conn = database.connect()) {
+                        database.delate(selectedCar);
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                    serviceList.remove(selectedCar);
+    
+                    serviceComboBox.getSelectionModel().clearSelection();
+                }
+                else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                    alert.showAndWait();
+                }
+            });*/
+            return opinionLayout;
+        }
 
 }
