@@ -16,12 +16,18 @@ public class Client implements Entity {
     public String readColumns(){
         return insertColumns();
     }
-    public String getTable(){
+    public String insertTable(){
         return "projekt.klient";
+    }
+    public String readTable(){
+        return insertTable();
     }
     public Object[] getData(){
         Object[] data={name,surname,phone_number,email};
         return data;
+    }
+    public String condition(){
+        return "";
     }
 
 }
