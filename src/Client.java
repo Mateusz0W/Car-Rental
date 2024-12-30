@@ -3,6 +3,7 @@ public class Client implements Entity {
     public String surname;
     public String phone_number;
     public String email;
+    public int id;
 
     Client(String name,String surname,String phone_number,String email){
         this.name=name;
@@ -10,11 +11,19 @@ public class Client implements Entity {
         this.phone_number=phone_number;
         this.email=email;
     }
+    Client(String name,String surname,String phone_number,String email,int id){
+        this.name=name;
+        this.surname=surname;
+        this.phone_number=phone_number;
+        this.email=email;
+        this.id=id;
+    }
+    Client(){}
     public String insertColumns(){
         return "imie, nazwisko, numer_telefonu, email";
     }
     public String readColumns(){
-        return insertColumns();
+        return "imie, nazwisko, numer_telefonu, email, id";
     }
     public String insertTable(){
         return "projekt.klient";
@@ -28,6 +37,9 @@ public class Client implements Entity {
     }
     public String condition(){
         return "";
+    }
+    public String toString(){
+        return id+" "+name+" "+surname;
     }
 
 }
