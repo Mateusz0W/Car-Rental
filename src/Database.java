@@ -17,7 +17,7 @@ public class Database {
     }
     public void insert(Entity entity){
         Object []data=entity.getData();
-        String query = "INSERT INTO " + entity.getTable() + " (" + entity.insertColumns() + ") VALUES (" + String.join(", ", java.util.Collections.nCopies(data.length, "?")) + ")";
+        String query = "INSERT INTO " + entity.insertTable() + " (" + entity.insertColumns() + ") VALUES (" + String.join(", ", java.util.Collections.nCopies(data.length, "?")) + ")";
         try (PreparedStatement pst = this.connection.prepareStatement(query)) {
             for (int i = 0; i < data.length; i++) {
                 if (data[i] instanceof Integer) {
@@ -48,7 +48,7 @@ public class Database {
     public ArrayList<ArrayList<String>> read(Entity entity){
         ArrayList<ArrayList<String>> result = new ArrayList<>();
         String columns= entity.readColumns();
-        String query = "SELECT " + columns + " FROM " + entity.getTable();
+        String query = "SELECT " + columns + " FROM " + entity.readTable();
         String[] columnArray = columns.split(",\\s*");
         try (PreparedStatement pst = this.connection.prepareStatement(query); 
             ResultSet rs = pst.executeQuery()) {
@@ -67,5 +67,16 @@ public class Database {
             e.printStackTrace();
         }
         return result;
+    }
+    public void delate(Entity entity){
+        String query = "DELETE FROM " + entity.insertTable() + " WHERE " + entity.condition();
+        try(PreparedStatement pst=this.connection.prepareStatement(query)){
+            pst.executeUpdate(); 
+            System.out.println("Data deleted");
+        }
+        catch(SQLException e){
+            System.out.println("Error in deleting data");
+            e.printStackTrace();
+        }
     }
 }
