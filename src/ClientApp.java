@@ -11,7 +11,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -23,12 +22,16 @@ public class ClientApp extends Application {
     private ObservableList<Service> serviceList = FXCollections.observableArrayList();
     private ObservableList<Insurance> insuranceList = FXCollections.observableArrayList();
     private ObservableList<Opinion> opinionList = FXCollections.observableArrayList();
+    private ObservableList<Booking> bookingList = FXCollections.observableArrayList();
 
     private TableView<Client> clientTableView = new TableView<>();
     private TableView<Car> carTableView = new TableView<>();
     private TableView<Service> serviceTableView = new TableView<>();
     private TableView<Insurance> insuranceTableView = new TableView<>();
     private TableView<Opinion> opinionTableView = new TableView<>();
+    private TableView<Booking> bookingTableView = new TableView<>();
+
+    private double cost=0.0;
 
     @Override
     public void start(Stage primaryStage) {
@@ -42,6 +45,7 @@ public class ClientApp extends Application {
         Tab serviceTab = new Tab("Serwis", createServiceForm());
         Tab insuranceTab = new Tab("Ubezpieczenia", createInsuranceForm());
         Tab opinionTab = new Tab("Opinie", createOpinionForm());
+        Tab bookingTab = new Tab("Rezerwacje", createBookingForm());
 
         // Ensure tabs are closable only programmatically
         clientTab.setClosable(false);
@@ -49,8 +53,9 @@ public class ClientApp extends Application {
         serviceTab.setClosable(false);
         insuranceTab.setClosable(false);
         opinionTab.setClosable(false);
+        bookingTab.setClosable(false);
 
-        tabPane.getTabs().addAll(clientTab, carTab,serviceTab,insuranceTab,opinionTab);
+        tabPane.getTabs().addAll(clientTab, carTab,serviceTab,insuranceTab,opinionTab,bookingTab);
 
         // Layout
         VBox layout = new VBox(10);
@@ -151,6 +156,7 @@ public class ClientApp extends Application {
             }
             
         });
+        refreshButton.fire();
         return clientLayout;
     }
 
@@ -294,6 +300,7 @@ public class ClientApp extends Application {
             }
             
         });
+        refreshCarsButton.fire();
         return carLayout;
     }
 
@@ -395,6 +402,8 @@ public class ClientApp extends Application {
             }
             
         });
+        refreshButton.fire();
+
         deleteButton.setOnAction(e->{
             Service selectedCar = serviceComboBox.getValue();
             if(selectedCar != null){
@@ -532,7 +541,9 @@ public class ClientApp extends Application {
                 e1.printStackTrace();
             }
             
-        });/* 
+        });
+        refreshButton.fire();
+        /* 
         deleteButton.setOnAction(e->{
             Service selectedCar = serviceComboBox.getValue();
             if(selectedCar != null){
@@ -660,7 +671,9 @@ public class ClientApp extends Application {
                     e1.printStackTrace();
                 }
                 
-            });/* 
+            });
+            refreshButton.fire();
+            /* 
             deleteButton.setOnAction(e->{
                 Service selectedCar = serviceComboBox.getValue();
                 if(selectedCar != null){
@@ -679,6 +692,179 @@ public class ClientApp extends Application {
                 }
             });*/
             return opinionLayout;
+        }
+        // Create form and table for opinion
+        private VBox createBookingForm() {
+            ObservableList<Car> availableCarsList = FXCollections.observableArrayList();
+
+            GridPane form = new GridPane();
+            form.setPadding(new Insets(10));
+            form.setHgap(10);
+            form.setVgap(10);
+    
+            Label startDateLabel = new Label("Data rozpoczęcia:");
+            DatePicker startDatePicker = new DatePicker();
+            Label endDateLabel = new Label("Data zakończenia:");
+            DatePicker endDatePicker = new DatePicker();
+            Label clientLabel = new Label("Klient:");
+            ComboBox<Client> clientComboBox = new ComboBox<>();
+            clientComboBox.setItems(clientList); 
+            clientComboBox.setPromptText("wybierz klienta");
+            Label availableCarsLabel = new Label("dostepne samochody");
+            ComboBox<Car> availableCarsComboBox = new ComboBox<>();
+            availableCarsComboBox.setItems(availableCarsList); 
+            availableCarsComboBox.setPromptText("wybierz samochód");
+            Button showButton = new Button("Wyświelt samochody");
+            Label costLabel = new Label("Całkowity koszt "+cost);
+            Button addButton = new Button("Wypożycz");
+    
+            form.add(startDateLabel, 0, 0);
+            form.add(startDatePicker, 1, 0);
+            form.add(endDateLabel, 0, 1);
+            form.add(endDatePicker, 1, 1);
+            form.add(showButton,0,2);
+            form.add(availableCarsLabel,0,3);
+            form.add(availableCarsComboBox,1,3);
+            form.add(costLabel,0,4);
+            form.add(clientLabel,0,5);
+            form.add(clientComboBox,1,5);
+            form.add(addButton,0,6);
+
+            TableColumn<Booking, String> brandColumn = new TableColumn<>("Marka");
+            brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
+    
+            TableColumn<Booking, String> modelColumn = new TableColumn<>("Model");
+            modelColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().model));
+    
+            TableColumn<Booking, String> categoryColumn = new TableColumn<>("Kategoria");
+            categoryColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().category));
+            
+            TableColumn<Booking, String> nameColumn = new TableColumn<>("Imie");
+            nameColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().name));
+
+            TableColumn<Booking, String> surnameColumn = new TableColumn<>("Nazwisko");
+            surnameColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().surname));
+            
+            TableColumn<Booking, String> emailColumn = new TableColumn<>("Nazwisko");
+            emailColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().email));
+
+            TableColumn<Booking, LocalDate> bookingDateColumn = new TableColumn<>("Data rezerwacji");
+            bookingDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().bookingDate));
+
+            TableColumn<Booking, LocalDate> startBookingDateColumn = new TableColumn<>("Data rozpoczęcia rezerwacji");
+            startBookingDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().startDate));
+
+            TableColumn<Booking, LocalDate> endBookingDateColumn = new TableColumn<>("Data końca rezerwacji");
+            endBookingDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().endDate));
+
+            TableColumn<Booking, String> statusColumn = new TableColumn<>("Status");
+            statusColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().status));
+
+            TableColumn<Booking, Double> costColumn = new TableColumn<>("całkowity koszt");
+            costColumn.setCellValueFactory(data ->new javafx.beans.property.SimpleDoubleProperty(data.getValue().cost).asObject());
+
+           
+            bookingTableView.getColumns().addAll(brandColumn, modelColumn, categoryColumn, nameColumn, surnameColumn,emailColumn,bookingDateColumn,startBookingDateColumn,endBookingDateColumn,statusColumn,costColumn);
+            bookingTableView.setItems(bookingList);
+    
+            showButton.setOnAction(e -> {
+                LocalDate starDate = startDatePicker.getValue();
+                LocalDate endDate = endDatePicker.getValue();
+    
+                if (starDate != null && endDate!=null) {
+                    availableCarsList.clear();
+                    AvailableCar availableCar = new AvailableCar(starDate,endDate);
+                    try (Connection conn = database.connect()) {
+                        System.out.println("Connected to database!");
+                        ArrayList<ArrayList<String>> rows = database.read(availableCar);
+                        for (ArrayList<String> row : rows) {
+                            if (row.size() == 6) { 
+                                AvailableCar car = new AvailableCar(row.get(0), row.get(1),row.get(2),Integer.parseInt(row.get(3)),Double.parseDouble( row.get(4)),Integer.parseInt(row.get(5)));
+                                availableCarsList.add(car);
+                            }
+                        }
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                
+                }
+            });
+            availableCarsComboBox.setOnAction(e->{
+                Car selectedCar = availableCarsComboBox.getValue();
+                long days =  endDatePicker.getValue().toEpochDay()-startDatePicker.getValue().toEpochDay();
+    
+                if(selectedCar != null){
+                    cost=days*selectedCar.daily_fee;
+                    costLabel.setText("Całkowity koszt "+cost);
+                }
+            });
+            
+            addButton.setOnAction(e -> {
+                Car selectedCar = availableCarsComboBox.getValue();
+                Client selectedClient = clientComboBox.getValue();
+                LocalDate startDate = startDatePicker.getValue();
+                LocalDate endDate =endDatePicker.getValue();
+                LocalDate currentDate = LocalDate.now();
+    
+                if (selectedCar != null && selectedClient!=null && startDate != null && endDate !=null && currentDate !=null ) {
+                    Booking booking = new Booking(selectedClient.id, selectedCar.id, currentDate, startDate, endDate,cost);
+                    try (Connection conn = database.connect()) {
+                        database.insert(booking);
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                    bookingList.add(booking);
+    
+                    availableCarsComboBox.getSelectionModel().clearSelection();
+                    clientComboBox.getSelectionModel().clearSelection();
+                    startDatePicker.setValue(null);
+                    endDatePicker.setValue(null);
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                    alert.showAndWait();
+                }
+            });
+            Button refreshButton = new Button("Refresh booking");
+            VBox bookingLayout = new VBox(10);
+            bookingLayout.setPadding(new Insets(10));
+            bookingLayout.getChildren().addAll(form, refreshButton, bookingTableView);
+            
+            refreshButton.setOnAction(e -> {
+                bookingList.clear();
+                try (Connection conn = database.connect()) {
+                    System.out.println("Connected to database!");
+                    ArrayList<ArrayList<String>> rows = database.read(new Booking()); 
+                    for (ArrayList<String> row : rows) {
+                        if (row.size() == 11) {
+                            Booking booking = new Booking(row.get(0), row.get(1),row.get(2),row.get(3),row.get(4),row.get(5),LocalDate.parse(row.get(6)),LocalDate.parse(row.get(7)),LocalDate.parse(row.get(8)),row.get(9),Double.parseDouble(row.get(10)));
+                            bookingList.add(booking);
+                        }
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                
+            });
+            refreshButton.fire();
+            /* 
+            deleteButton.setOnAction(e->{
+                Service selectedCar = serviceComboBox.getValue();
+                if(selectedCar != null){
+                    try (Connection conn = database.connect()) {
+                        database.delate(selectedCar);
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                    serviceList.remove(selectedCar);
+    
+                    serviceComboBox.getSelectionModel().clearSelection();
+                }
+                else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                    alert.showAndWait();
+                }
+            });*/
+            return bookingLayout;
         }
 
 }
