@@ -8,9 +8,12 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -46,6 +49,7 @@ public class ClientApp extends Application {
         Tab insuranceTab = new Tab("Ubezpieczenia", createInsuranceForm());
         Tab opinionTab = new Tab("Opinie", createOpinionForm());
         Tab bookingTab = new Tab("Rezerwacje", createBookingForm());
+        Tab statisticsTab = new Tab("Statystyki",createStatisticsForm());
 
         // Ensure tabs are closable only programmatically
         clientTab.setClosable(false);
@@ -54,8 +58,9 @@ public class ClientApp extends Application {
         insuranceTab.setClosable(false);
         opinionTab.setClosable(false);
         bookingTab.setClosable(false);
+        statisticsTab.setClosable(false);
 
-        tabPane.getTabs().addAll(clientTab, carTab,serviceTab,insuranceTab,opinionTab,bookingTab);
+        tabPane.getTabs().addAll(clientTab, carTab,serviceTab,insuranceTab,opinionTab,bookingTab,statisticsTab);
 
         // Layout
         VBox layout = new VBox(10);
@@ -866,5 +871,95 @@ public class ClientApp extends Application {
             });*/
             return bookingLayout;
         }
+        private VBox createStatisticsForm(){
+            ObservableList<AvgOpinion> avgOpinionList = FXCollections.observableArrayList();
+            ObservableList<ServiceStats> serviceStatsList = FXCollections.observableArrayList();
 
+            TableView<AvgOpinion>   avgOpinionTableView = new TableView<>();
+            TableView<ServiceStats>  serviceStatsTableView = new TableView<>();
+
+            TableColumn<AvgOpinion, String> brandColumn = new TableColumn<>("Marka");
+            brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
+
+            TableColumn<AvgOpinion, String> modelColumn = new TableColumn<>("Model");
+            modelColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().model));
+
+            TableColumn<AvgOpinion, String> categoryColumn = new TableColumn<>("Kategoria");
+            categoryColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().category));
+
+            TableColumn<AvgOpinion, Double> avgGradeColumn = new TableColumn<>("Średnia ocena");
+            avgGradeColumn.setCellValueFactory(data ->new javafx.beans.property.SimpleDoubleProperty(data.getValue().avgGrade).asObject());
+
+            TableColumn<AvgOpinion, Integer> numOfOpinionsColumn = new TableColumn<>("Liczba opinii");
+            numOfOpinionsColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().numOfOpinions));
+
+            avgOpinionTableView.getColumns().addAll(brandColumn, modelColumn, categoryColumn, avgGradeColumn, numOfOpinionsColumn);
+            avgOpinionTableView.setItems(avgOpinionList);
+
+            // Configure ServiceStats TableView
+            TableColumn<ServiceStats, String> serviceBrandColumn = new TableColumn<>("Marka");
+            serviceBrandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
+
+            TableColumn<ServiceStats, String> serviceModelColumn = new TableColumn<>("Model");
+            serviceModelColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().model));
+
+            TableColumn<ServiceStats, Integer> yearColumn = new TableColumn<>("Rok");
+            yearColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().year));
+
+            TableColumn<ServiceStats, Integer> mileageColumn = new TableColumn<>("Przebieg");
+            mileageColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().mileage));
+
+            TableColumn<ServiceStats, Double> sumCostColumn = new TableColumn<>("Suma kosztów");
+            sumCostColumn.setCellValueFactory(data ->new javafx.beans.property.SimpleDoubleProperty(data.getValue().sumCost).asObject());
+
+            TableColumn<ServiceStats, Double> maxCostColumn = new TableColumn<>("Maks. koszt");
+            maxCostColumn.setCellValueFactory(data ->new javafx.beans.property.SimpleDoubleProperty(data.getValue().maxCost).asObject());
+
+            TableColumn<ServiceStats, String> maxCostDescColumn = new TableColumn<>("Opis maks. usterki");
+            maxCostDescColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().maxCostDescription));
+
+            serviceStatsTableView.getColumns().addAll(serviceBrandColumn, serviceModelColumn, yearColumn, mileageColumn, sumCostColumn, maxCostColumn, maxCostDescColumn);
+            serviceStatsTableView.setItems(serviceStatsList);
+
+
+            Button refreshButton = new Button("Odśwież");
+
+            refreshButton.setOnAction(e -> {
+                avgOpinionList.clear();
+                try (Connection conn = database.connect()) {
+                    System.out.println("Connected to database!");
+                    ArrayList<ArrayList<String>> rows = database.read(new AvgOpinion()); 
+                    for (ArrayList<String> row : rows) {
+                        if (row.size() == 5) { 
+                            AvgOpinion avgOpinion = new AvgOpinion(row.get(0), row.get(1),row.get(2),Double.parseDouble(row.get(3)),Integer.parseInt(row.get(4)));
+                            avgOpinionList.add(avgOpinion);
+                        }
+                    }
+    
+                    rows = database.read(new ServiceStats()); 
+                    for (ArrayList<String> row : rows) {
+                        if (row.size() == 7) { 
+                            ServiceStats stats = new ServiceStats(row.get(0), row.get(1),Integer.parseInt(row.get(2)),Integer.parseInt(row.get(3)),Double.parseDouble(row.get(4)),Double.parseDouble(row.get(5)),row.get(6));
+                            serviceStatsList.add(stats);
+                        }
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                
+            });
+            refreshButton.fire();
+
+            VBox avgOpinionBox = new VBox(10, new Label("Średnie Opinie"), avgOpinionTableView);
+            VBox serviceStatsBox = new VBox(10, new Label("Statystyki Serwisowe"), serviceStatsTableView);
+
+            HBox tablesBox = new HBox(20, avgOpinionBox, serviceStatsBox);
+            tablesBox.setPadding(new Insets(10));
+
+            VBox layout = new VBox(20, tablesBox, refreshButton);
+            layout.setPadding(new Insets(10));
+            layout.setAlignment(Pos.CENTER);
+
+            return layout;
+        }
 }
