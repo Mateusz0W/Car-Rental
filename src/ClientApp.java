@@ -87,6 +87,9 @@ public class ClientApp extends Application {
         Label emailLabel = new Label("Email:");
         TextField emailField = new TextField();
         Button addButton = new Button("Add Client");
+        ComboBox<Client> clientComboBox = new ComboBox<>();
+        clientComboBox.setItems(clientList); 
+        Button deleteButton = new Button("Usuń Klienta");
 
         form.add(nameLabel, 0, 0);
         form.add(nameField, 1, 0);
@@ -97,6 +100,8 @@ public class ClientApp extends Application {
         form.add(emailLabel, 0, 3);
         form.add(emailField, 1, 3);
         form.add(addButton, 1, 4);
+        form.add(clientComboBox,5,0);
+        form.add(deleteButton,5,1);
 
         // Table for displaying clients
         TableColumn<Client, String> nameColumn = new TableColumn<>("Name");
@@ -162,6 +167,24 @@ public class ClientApp extends Application {
             
         });
         refreshButton.fire();
+
+        deleteButton.setOnAction(e->{
+            Client selectedClient = clientComboBox.getValue();
+            if(selectedClient != null){
+                try (Connection conn = database.connect()) {
+                    database.delate(selectedClient);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                clientList.remove(selectedClient);
+
+                clientComboBox.getSelectionModel().clearSelection();
+            }
+            else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                alert.showAndWait();
+            }
+        });
         return clientLayout;
     }
 
@@ -187,6 +210,9 @@ public class ClientApp extends Application {
         Label dailyFeeLabel = new Label("dzienna_oplata:");
         TextField dailyFeeField = new TextField();
         Button addButton = new Button("Add Car");
+        ComboBox<Car> carComboBox = new ComboBox<>();
+        carComboBox.setItems(carList);
+        Button deleteButton = new Button("Usuń Samochód");
 
         form.add(barndLabel, 0, 0);
         form.add(brandField, 1, 0);
@@ -203,6 +229,8 @@ public class ClientApp extends Application {
         form.add(dailyFeeLabel, 0, 6);
         form.add(dailyFeeField, 1, 6);
         form.add(addButton, 1, 7);
+        form.add(carComboBox,5,0);
+        form.add(deleteButton,5,1);
 
         // Table for displaying cars
         TableColumn<Car, String> makeColumn = new TableColumn<>("Marka");
@@ -306,6 +334,24 @@ public class ClientApp extends Application {
             
         });
         refreshCarsButton.fire();
+
+        deleteButton.setOnAction(e->{
+            Car selectedCar = carComboBox.getValue();
+            if(selectedCar != null){
+                try (Connection conn = database.connect()) {
+                    database.delate(selectedCar);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                carList.remove(selectedCar);
+
+                carComboBox.getSelectionModel().clearSelection();
+            }
+            else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
+                alert.showAndWait();
+            }
+        });
         return carLayout;
     }
 
@@ -454,6 +500,9 @@ public class ClientApp extends Application {
         Label companyLabel = new Label("firma:");
         TextField companyField = new TextField();
         Button addButton = new Button("Buy insurance for car");
+        ComboBox<Insurance> insuranceComboBox = new ComboBox<>();
+        insuranceComboBox.setItems(insuranceList);
+        Button deleteButton= new Button("Usuń ubezpieczenie");
         
         
 
@@ -470,6 +519,8 @@ public class ClientApp extends Application {
         form.add(companyLabel,0,5);
         form.add(companyField,1,5);
         form.add(addButton,0,6);
+        form.add(insuranceComboBox,5,0);
+        form.add(deleteButton,5,1);
        
 
         TableColumn<Insurance, String> brandColumn = new TableColumn<>("Marka");
@@ -537,8 +588,8 @@ public class ClientApp extends Application {
                 System.out.println("Connected to database!");
                 ArrayList<ArrayList<String>> rows = database.read(new Insurance()); // Dummy insurance to fetch data
                 for (ArrayList<String> row : rows) {
-                    if (row.size() == 8) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
-                        Insurance insurance = new Insurance(row.get(0), row.get(1),row.get(2),LocalDate.parse(row.get(3)),LocalDate.parse(row.get(4)),InsuranceType.valueOf( row.get(5)),Double.parseDouble( row.get(6)),row.get(7));
+                    if (row.size() == 9) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                        Insurance insurance = new Insurance(row.get(0), row.get(1),row.get(2),LocalDate.parse(row.get(3)),LocalDate.parse(row.get(4)),InsuranceType.valueOf( row.get(5)),Double.parseDouble( row.get(6)),row.get(7),Integer.parseInt(row.get(8)));
                         insuranceList.add(insurance);
                     }
                 }
@@ -548,24 +599,24 @@ public class ClientApp extends Application {
             
         });
         refreshButton.fire();
-        /* 
+         
         deleteButton.setOnAction(e->{
-            Service selectedCar = serviceComboBox.getValue();
-            if(selectedCar != null){
+            Insurance selectedInsurance = insuranceComboBox.getValue();
+            if(selectedInsurance != null){
                 try (Connection conn = database.connect()) {
-                    database.delate(selectedCar);
+                    database.delate(selectedInsurance);
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
-                serviceList.remove(selectedCar);
+                insuranceList.remove(selectedInsurance);
 
-                serviceComboBox.getSelectionModel().clearSelection();
+                insuranceComboBox.getSelectionModel().clearSelection();
             }
             else {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
                 alert.showAndWait();
             }
-        });*/
+        });
         return insuranceLayout;
     }
         // Create form and table for opinion
@@ -587,6 +638,9 @@ public class ClientApp extends Application {
             TextArea opinionField = new TextArea();
             opinionField.setPromptText("Wpisz opinie");
             Button addButton = new Button("Dodaj opinie");
+            ComboBox<Opinion> opinionComboBox = new ComboBox<>();
+            opinionComboBox.setItems(opinionList);
+            Button deleteButton = new Button("Usun opinie");
 
             Label gradeLabel = new Label("Ocena:");
             ComboBox<Integer> gradeComboBox = new ComboBox<>();
@@ -602,6 +656,8 @@ public class ClientApp extends Application {
             form.add(gradeLabel,0,3);
             form.add(gradeComboBox,1,3);
             form.add(addButton,0,4);
+            form.add(opinionComboBox,5,0);
+            form.add(deleteButton,5,1);
     
             TableColumn<Opinion, String> brandColumn = new TableColumn<>("Marka");
             brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
@@ -667,8 +723,8 @@ public class ClientApp extends Application {
                     System.out.println("Connected to database!");
                     ArrayList<ArrayList<String>> rows = database.read(new Opinion()); // Dummy insurance to fetch data
                     for (ArrayList<String> row : rows) {
-                        if (row.size() == 8) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
-                            Opinion opinion = new Opinion(row.get(0), row.get(1),row.get(2),row.get(3),row.get(4),Integer.parseInt( row.get(5)),row.get(6),LocalDate.parse(row.get(7)));
+                        if (row.size() == 9) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                            Opinion opinion = new Opinion(row.get(0), row.get(1),row.get(2),row.get(3),row.get(4),Integer.parseInt( row.get(5)),row.get(6),LocalDate.parse(row.get(7)),Integer.parseInt(row.get(8)));
                             opinionList.add(opinion);
                         }
                     }
@@ -678,24 +734,23 @@ public class ClientApp extends Application {
                 
             });
             refreshButton.fire();
-            /* 
+            
             deleteButton.setOnAction(e->{
-                Service selectedCar = serviceComboBox.getValue();
-                if(selectedCar != null){
+                Opinion selectedOpinion = opinionComboBox.getValue();
+                if(selectedOpinion != null){
                     try (Connection conn = database.connect()) {
-                        database.delate(selectedCar);
+                        database.delate(selectedOpinion);
                     } catch (SQLException e1) {
                         e1.printStackTrace();
                     }
-                    serviceList.remove(selectedCar);
-    
-                    serviceComboBox.getSelectionModel().clearSelection();
+                    opinionList.remove(selectedOpinion);
+                    opinionComboBox.getSelectionModel().clearSelection();
                 }
                 else {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
                     alert.showAndWait();
                 }
-            });*/
+            });
             return opinionLayout;
         }
         // Create form and table for opinion
@@ -722,6 +777,9 @@ public class ClientApp extends Application {
             Button showButton = new Button("Wyświelt samochody");
             Label costLabel = new Label("Całkowity koszt "+cost);
             Button addButton = new Button("Wypożycz");
+            ComboBox<Booking> bookingComboBox = new ComboBox<>();
+            bookingComboBox.setItems(bookingList);
+            Button deleteButton = new Button("Usuń");
     
             form.add(startDateLabel, 0, 0);
             form.add(startDatePicker, 1, 0);
@@ -734,6 +792,8 @@ public class ClientApp extends Application {
             form.add(clientLabel,0,5);
             form.add(clientComboBox,1,5);
             form.add(addButton,0,6);
+            form.add(bookingComboBox,5,0);
+            form.add(deleteButton,5,1);
 
             TableColumn<Booking, String> brandColumn = new TableColumn<>("Marka");
             brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
@@ -840,8 +900,8 @@ public class ClientApp extends Application {
                     System.out.println("Connected to database!");
                     ArrayList<ArrayList<String>> rows = database.read(new Booking()); 
                     for (ArrayList<String> row : rows) {
-                        if (row.size() == 11) {
-                            Booking booking = new Booking(row.get(0), row.get(1),row.get(2),row.get(3),row.get(4),row.get(5),LocalDate.parse(row.get(6)),LocalDate.parse(row.get(7)),LocalDate.parse(row.get(8)),row.get(9),Double.parseDouble(row.get(10)));
+                        if (row.size() == 12) {
+                            Booking booking = new Booking(row.get(0), row.get(1),row.get(2),row.get(3),row.get(4),row.get(5),LocalDate.parse(row.get(6)),LocalDate.parse(row.get(7)),LocalDate.parse(row.get(8)),row.get(9),Double.parseDouble(row.get(10)),Integer.parseInt(row.get(11)));
                             bookingList.add(booking);
                         }
                     }
@@ -851,24 +911,24 @@ public class ClientApp extends Application {
                 
             });
             refreshButton.fire();
-            /* 
+            
             deleteButton.setOnAction(e->{
-                Service selectedCar = serviceComboBox.getValue();
-                if(selectedCar != null){
+                Booking selectedBooking = bookingComboBox.getValue();
+                if(selectedBooking != null){
                     try (Connection conn = database.connect()) {
-                        database.delate(selectedCar);
+                        database.delate(selectedBooking);
                     } catch (SQLException e1) {
                         e1.printStackTrace();
                     }
-                    serviceList.remove(selectedCar);
+                    bookingList.remove(selectedBooking);
     
-                    serviceComboBox.getSelectionModel().clearSelection();
+                    bookingComboBox.getSelectionModel().clearSelection();
                 }
                 else {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
                     alert.showAndWait();
                 }
-            });*/
+            });
             return bookingLayout;
         }
         private VBox createStatisticsForm(){

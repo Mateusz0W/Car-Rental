@@ -50,7 +50,7 @@ public class Car implements Entity {
         return brand+" "+model+" "+year;
     }
     public String condition(){
-        return "";
+        return "id = "+id;
     }
 
 }

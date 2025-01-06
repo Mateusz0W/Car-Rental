@@ -1,6 +1,7 @@
 import java.time.LocalDate;
 
 public class Booking implements Entity {
+    public int id;
     public int clinetId;
     public int carId;
     public LocalDate bookingDate;
@@ -25,7 +26,7 @@ public class Booking implements Entity {
         this.endDate=endDate;
         this.cost=cost;
     }
-    Booking(String brand,String model, String category, String name, String surname, String email, LocalDate bookingDate, LocalDate startDate, LocalDate endDate, String status, double cost){
+    Booking(String brand,String model, String category, String name, String surname, String email, LocalDate bookingDate, LocalDate startDate, LocalDate endDate, String status, double cost,int id){
         this.brand=brand;
         this.model=model;
         this.category=category;
@@ -37,13 +38,14 @@ public class Booking implements Entity {
         this.endDate=endDate;
         this.status=status;
         this.cost=cost;
+        this.id=id;
     }
     Booking(){}
     public String insertColumns(){
         return "id_klienta, id_samochodu, data_rezerwacji, data_rozpoczecia, data_zakonczenia, całkowity_koszt";
     }
     public String readColumns(){
-        return "marka, model, kategoria, imie, nazwisko, email, data_rezerwacji, data_rozpoczecia, data_zakonczenia, status, całkowity_koszt";
+        return "marka, model, kategoria, imie, nazwisko, email, data_rezerwacji, data_rozpoczecia, data_zakonczenia, status, całkowity_koszt, id";
     }
     public String insertTable(){
         return "projekt.rezerwacja";
@@ -56,6 +58,9 @@ public class Booking implements Entity {
         return data;
     }
     public String condition(){
-        return "";
+        return "id = "+id;
+    }
+    public String toString(){
+        return brand +" "+ email+" "+bookingDate;
     }
 }

@@ -36,7 +36,7 @@ public class Client implements Entity {
         return data;
     }
     public String condition(){
-        return "";
+        return "id = " + id;
     }
     public String toString(){
         return id+" "+name+" "+surname;

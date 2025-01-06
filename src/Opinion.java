@@ -1,6 +1,7 @@
 import java.time.LocalDate;
 
 public class Opinion implements Entity {
+    public int id;
     public int clientId;
     public int carId;
     public String opinion;
@@ -20,7 +21,7 @@ public class Opinion implements Entity {
         this.grade=grade;
         this.date=date;
     }
-    Opinion(String brand,String model,String category,String name,String surname,int grade,String opinion,LocalDate date){
+    Opinion(String brand,String model,String category,String name,String surname,int grade,String opinion,LocalDate date,int id){
         this.brand=brand;
         this.model=model;
         this.category=category;
@@ -29,6 +30,7 @@ public class Opinion implements Entity {
         this.grade=grade;
         this.opinion=opinion;
         this.date=date;
+        this.id=id;
     }
     Opinion(){}
 
@@ -36,7 +38,7 @@ public class Opinion implements Entity {
         return "id_klienta, id_samochodu, opinia, ocena, data_opinii";
     }
     public String readColumns(){
-        return "marka, model, kategoria, imie, nazwisko, ocena, opinia, data_opinii";
+        return "marka, model, kategoria, imie, nazwisko, ocena, opinia, data_opinii, id";
     }
     public String insertTable(){
         return "projekt.opinie";
@@ -49,6 +51,9 @@ public class Opinion implements Entity {
         return data;
     }
     public String condition(){
-        return "";
+        return "id = " +id;
     }
-}
+    public String toString(){
+        return brand+" "+model+" "+grade;
+    }
+}   

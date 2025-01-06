@@ -3,6 +3,7 @@ import java.time.LocalDate;
 
 
 public class Insurance implements Entity {
+    public int id;
     public int car_id;
     public InsuranceType type;
     public LocalDate start_date;
@@ -22,7 +23,7 @@ public class Insurance implements Entity {
         this.cost=cost;
         this.company=company;
     }
-    Insurance(String brand,String model,String registration_number,LocalDate starDate,LocalDate endDate,InsuranceType type,double cost,String company){
+    Insurance(String brand,String model,String registration_number,LocalDate starDate,LocalDate endDate,InsuranceType type,double cost,String company,int id){
         this.brand=brand;
         this.model=model;
         this.registration_number=registration_number;
@@ -31,6 +32,7 @@ public class Insurance implements Entity {
         this.end_date=endDate;
         this.cost=cost;
         this.company=company;
+        this.id=id;
     }
     Insurance(){}
     
@@ -38,7 +40,7 @@ public class Insurance implements Entity {
         return "id_samochodu, rodzaj, data_rozpoczecia, data_zakonczenia, koszt, nazwa_ubezpieczyciela";
     }
     public String readColumns(){
-        return "Marka, Model, numer_rejestracyjny, data_rozpoczecia, data_zakonczenia, rodzaj, koszt, nazwa_ubezpieczyciela";
+        return "Marka, Model, numer_rejestracyjny, data_rozpoczecia, data_zakonczenia, rodzaj, koszt, nazwa_ubezpieczyciela, id";
     }
     public String insertTable(){
         return "projekt.ubezpieczenia";
@@ -51,6 +53,9 @@ public class Insurance implements Entity {
         return data;
     }
     public String condition(){
-        return "";
+        return "id = "+id;
+    }
+    public String toString(){
+        return company+" "+brand+" "+model;
     }
 }
