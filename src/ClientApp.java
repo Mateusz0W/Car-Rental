@@ -986,6 +986,8 @@ public class ClientApp extends Application {
 
             refreshButton.setOnAction(e -> {
                 avgOpinionList.clear();
+                serviceStatsList.clear();
+                
                 try (Connection conn = database.connect()) {
                     System.out.println("Connected to database!");
                     ArrayList<ArrayList<String>> rows = database.read(new AvgOpinion()); 
