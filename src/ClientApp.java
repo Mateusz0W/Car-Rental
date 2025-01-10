@@ -10,6 +10,10 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
@@ -786,7 +790,7 @@ public class ClientApp extends Application {
             Button deleteButton = new Button("Usuń");
 
             ComboBox<String> paymentMethodComboBox=new ComboBox<>();
-            paymentMethodComboBox.getItems().addAll("Karta", "Gotówka");
+            paymentMethodComboBox.getItems().addAll("Karta", "Gotowka");
             paymentMethodComboBox.setPromptText("Wybierz metode płatności");
     
             form.add(startDateLabel, 0, 0);
@@ -999,13 +1003,26 @@ public class ClientApp extends Application {
             serviceStatsTableView.getColumns().addAll(serviceBrandColumn, serviceModelColumn, yearColumn, mileageColumn, sumCostColumn, maxCostColumn, maxCostDescColumn);
             serviceStatsTableView.setItems(serviceStatsList);
 
+            // Configure paymentStats Chart
+            final CategoryAxis xAxis = new CategoryAxis();
+            xAxis.setLabel("Miesiąc");
+            final NumberAxis yAxis = new NumberAxis();
+            yAxis.setLabel("Przychód");
+
+            BarChart<String, Number> incomeChart = new BarChart<>(xAxis, yAxis);
+            incomeChart.setTitle("Miesięczne Przychody");
+            XYChart.Series<String, Number> year = new XYChart.Series<>();
+            year.setName(String.valueOf(LocalDate.now().getYear()));
 
             Button refreshButton = new Button("Odśwież");
 
             refreshButton.setOnAction(e -> {
                 avgOpinionList.clear();
                 serviceStatsList.clear();
-                
+                incomeChart.getData().clear();
+                year.getData().clear();
+
+
                 try (Connection conn = database.connect()) {
                     System.out.println("Connected to database!");
                     ArrayList<ArrayList<String>> rows = database.read(new AvgOpinion()); 
@@ -1023,6 +1040,14 @@ public class ClientApp extends Application {
                             serviceStatsList.add(stats);
                         }
                     }
+
+                    rows=database.read(new PaymentStats());
+                    for (ArrayList<String> row : rows) {
+                        if (row.size() == 2) { 
+                            year.getData().add(new XYChart.Data<>(row.get(0),Double.parseDouble(row.get(1))));
+                        }
+                    }
+                    incomeChart.getData().add(year);
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -1036,7 +1061,8 @@ public class ClientApp extends Application {
             HBox tablesBox = new HBox(20, avgOpinionBox, serviceStatsBox);
             tablesBox.setPadding(new Insets(10));
 
-            VBox layout = new VBox(20, tablesBox, refreshButton);
+
+            VBox layout = new VBox(20, tablesBox,  incomeChart,refreshButton);
             layout.setPadding(new Insets(10));
             layout.setAlignment(Pos.CENTER);
 
