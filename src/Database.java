@@ -34,7 +34,7 @@ public class Database {
                     pst.setTimestamp(i + 1, (java.sql.Timestamp) data[i]);
                 } else if (data[i] instanceof Boolean) {
                     pst.setBoolean(i + 1, (Boolean) data[i]);
-                } else if (data[i] instanceof InsuranceType){
+                } else if (data[i] instanceof InsuranceType || data[i] instanceof PaymentMethod){
                     pst.setObject(i + 1, data[i].toString(), Types.OTHER);
                 }
                  else {

@@ -26,6 +26,7 @@ public class ClientApp extends Application {
     private ObservableList<Insurance> insuranceList = FXCollections.observableArrayList();
     private ObservableList<Opinion> opinionList = FXCollections.observableArrayList();
     private ObservableList<Booking> bookingList = FXCollections.observableArrayList();
+    private ObservableList<Payment> paymentList = FXCollections.observableArrayList();
 
     private TableView<Client> clientTableView = new TableView<>();
     private TableView<Car> carTableView = new TableView<>();
@@ -33,6 +34,7 @@ public class ClientApp extends Application {
     private TableView<Insurance> insuranceTableView = new TableView<>();
     private TableView<Opinion> opinionTableView = new TableView<>();
     private TableView<Booking> bookingTableView = new TableView<>();
+    private TableView<Payment> paymentTableView = new TableView<>(); 
 
     private double cost=0.0;
 
@@ -49,6 +51,7 @@ public class ClientApp extends Application {
         Tab insuranceTab = new Tab("Ubezpieczenia", createInsuranceForm());
         Tab opinionTab = new Tab("Opinie", createOpinionForm());
         Tab bookingTab = new Tab("Rezerwacje", createBookingForm());
+        Tab paymentTab = new Tab("Płatności",createPaymentForm());
         Tab statisticsTab = new Tab("Statystyki",createStatisticsForm());
 
         // Ensure tabs are closable only programmatically
@@ -58,9 +61,10 @@ public class ClientApp extends Application {
         insuranceTab.setClosable(false);
         opinionTab.setClosable(false);
         bookingTab.setClosable(false);
+        paymentTab.setClosable(false);
         statisticsTab.setClosable(false);
 
-        tabPane.getTabs().addAll(clientTab, carTab,serviceTab,insuranceTab,opinionTab,bookingTab,statisticsTab);
+        tabPane.getTabs().addAll(clientTab, carTab,serviceTab,insuranceTab,opinionTab,bookingTab,paymentTab,statisticsTab);
 
         // Layout
         VBox layout = new VBox(10);
@@ -780,6 +784,10 @@ public class ClientApp extends Application {
             ComboBox<Booking> bookingComboBox = new ComboBox<>();
             bookingComboBox.setItems(bookingList);
             Button deleteButton = new Button("Usuń");
+
+            ComboBox<String> paymentMethodComboBox=new ComboBox<>();
+            paymentMethodComboBox.getItems().addAll("Karta", "Gotówka");
+            paymentMethodComboBox.setPromptText("Wybierz metode płatności");
     
             form.add(startDateLabel, 0, 0);
             form.add(startDatePicker, 1, 0);
@@ -791,7 +799,8 @@ public class ClientApp extends Application {
             form.add(costLabel,0,4);
             form.add(clientLabel,0,5);
             form.add(clientComboBox,1,5);
-            form.add(addButton,0,6);
+            form.add(paymentMethodComboBox,0,6);
+            form.add(addButton,0,7);
             form.add(bookingComboBox,5,0);
             form.add(deleteButton,5,1);
 
@@ -870,20 +879,29 @@ public class ClientApp extends Application {
                 LocalDate startDate = startDatePicker.getValue();
                 LocalDate endDate =endDatePicker.getValue();
                 LocalDate currentDate = LocalDate.now();
+                String paymentMethod = paymentMethodComboBox.getValue();
     
-                if (selectedCar != null && selectedClient!=null && startDate != null && endDate !=null && currentDate !=null ) {
+                if (selectedCar != null && selectedClient!=null && startDate != null && endDate !=null && currentDate !=null && paymentMethod!=null) {
                     Booking booking = new Booking(selectedClient.id, selectedCar.id, currentDate, startDate, endDate,cost);
+                    Payment payment = new Payment();
                     try (Connection conn = database.connect()) {
                         database.insert(booking);
+                        ArrayList<ArrayList<String>> rows= database.read(new Booking());
+                        int lastBookingId=Integer.parseInt(rows.get(rows.size()-1).get(11));
+                        payment = new Payment(lastBookingId,currentDate,cost,PaymentMethod.valueOf(paymentMethod));
+                        database.insert(payment);
                     } catch (SQLException e1) {
                         e1.printStackTrace();
                     }
                     bookingList.add(booking);
-    
+                    paymentList.add(payment);
+
                     availableCarsComboBox.getSelectionModel().clearSelection();
                     clientComboBox.getSelectionModel().clearSelection();
+                    paymentMethodComboBox.getSelectionModel().clearSelection();
                     startDatePicker.setValue(null);
                     endDatePicker.setValue(null);
+
                 } else {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "All fields are required.");
                     alert.showAndWait();
@@ -1023,5 +1041,54 @@ public class ClientApp extends Application {
             layout.setAlignment(Pos.CENTER);
 
             return layout;
+        }
+        private VBox createPaymentForm(){
+            GridPane form = new GridPane();
+            form.setPadding(new Insets(10));
+            form.setHgap(10);
+            form.setVgap(10);
+
+            TableColumn<Payment, String> nameColumn = new TableColumn<>("Imie");
+            nameColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().name));
+
+            TableColumn<Payment, String> surnameColumn = new TableColumn<>("Nazwisko");
+            surnameColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().surname));
+
+            TableColumn<Payment, Double> costColumn = new TableColumn<>("Kwota");
+            costColumn.setCellValueFactory(data ->new javafx.beans.property.SimpleDoubleProperty(data.getValue().cost).asObject());
+
+            TableColumn<Payment, String> paymentMethodColumn = new TableColumn<>("Nazwisko");
+            paymentMethodColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(String.valueOf(data.getValue().paymentMethod)));
+
+            TableColumn<Payment, LocalDate> paymentDateColumn = new TableColumn<>("Data płatności");
+            paymentDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().paymentDate));
+
+            paymentTableView.getColumns().addAll( nameColumn, surnameColumn,costColumn,paymentMethodColumn,paymentDateColumn);
+            paymentTableView.setItems(paymentList);
+
+            Button refreshButton = new Button("odśwież");
+            VBox paymentLayout = new VBox(10);
+            paymentLayout.setPadding(new Insets(10));
+            paymentLayout.getChildren().addAll(form, refreshButton, paymentTableView);
+            
+            refreshButton.setOnAction(e -> {
+                paymentList.clear();
+                try (Connection conn = database.connect()) {
+                    System.out.println("Connected to database!");
+                    ArrayList<ArrayList<String>> rows = database.read(new Payment()); 
+                    for (ArrayList<String> row : rows) {
+                        if (row.size() == 5) {
+                            Payment payment = new Payment(row.get(0), row.get(1),Double.parseDouble(row.get(2)),PaymentMethod.valueOf(row.get(3)),LocalDate.parse(row.get(4)));
+                            paymentList.add(payment);
+                        }
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                
+            });
+            refreshButton.fire();
+            return paymentLayout;
+
         }
 }
