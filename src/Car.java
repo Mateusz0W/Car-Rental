@@ -29,6 +29,9 @@ public class Car implements Entity {
         this.daily_fee=daily_fee;
         this.id=id;
     }
+    Car(int id){
+        this.id=id;
+    }
     Car(){}
     public String insertColumns(){
         return "marka, model, kategoria, rok, numer_rejestracyjny, przebieg, dzienna_oplata";
