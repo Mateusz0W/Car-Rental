@@ -98,6 +98,7 @@ public class ClientApp extends Application {
         ComboBox<Client> clientComboBox = new ComboBox<>();
         clientComboBox.setItems(clientList); 
         Button deleteButton = new Button("Usuń Klienta");
+        Button updateButton = new Button("Zaktualizuj dane");
 
         form.add(nameLabel, 0, 0);
         form.add(nameField, 1, 0);
@@ -110,6 +111,7 @@ public class ClientApp extends Application {
         form.add(addButton, 1, 4);
         form.add(clientComboBox,5,0);
         form.add(deleteButton,5,1);
+        form.add(updateButton,5,2);
 
         // Table for displaying clients
         TableColumn<Client, String> nameColumn = new TableColumn<>("Name");
@@ -193,6 +195,35 @@ public class ClientApp extends Application {
                 alert.showAndWait();
             }
         });
+        updateButton.setOnAction(e->{
+            Client selectedClient = clientComboBox.getValue();
+            String updateFields ="";
+            if(! nameField.getText().isEmpty())
+                updateFields+="imie = '"+nameField.getText()+"', ";
+            if(! surnameField.getText().isEmpty())
+                updateFields+="nazwisko = '"+surnameField.getText()+"', ";
+            if(! phoneField.getText().isEmpty())
+                updateFields+="numer_telefonu = '"+phoneField.getText()+"', ";
+            if(! emailField.getText().isEmpty())
+                updateFields+="email = '"+emailField.getText()+"', ";
+            if(selectedClient != null && !updateFields.equals("")){
+                updateFields=updateFields.substring(0, updateFields.length()-2);
+                try (Connection conn = database.connect()) {
+                    database.update(selectedClient,updateFields);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                clientComboBox.getSelectionModel().clearSelection();
+                nameField.clear();
+                surnameField.clear();
+                phoneField.clear();
+                emailField.clear();
+            }
+            else{
+                Alert alert = new Alert(Alert.AlertType.ERROR, "missing fields");
+                alert.showAndWait();
+            }
+        });
         return clientLayout;
     }
 
@@ -221,6 +252,7 @@ public class ClientApp extends Application {
         ComboBox<Car> carComboBox = new ComboBox<>();
         carComboBox.setItems(carList);
         Button deleteButton = new Button("Usuń Samochód");
+        Button updateButton = new Button("Zaktualizuj dane");
 
         form.add(barndLabel, 0, 0);
         form.add(brandField, 1, 0);
@@ -239,6 +271,7 @@ public class ClientApp extends Application {
         form.add(addButton, 1, 7);
         form.add(carComboBox,5,0);
         form.add(deleteButton,5,1);
+        form.add(updateButton,5,2);
 
         // Table for displaying cars
         TableColumn<Car, String> makeColumn = new TableColumn<>("Marka");
@@ -360,6 +393,45 @@ public class ClientApp extends Application {
                 alert.showAndWait();
             }
         });
+
+        updateButton.setOnAction(e->{
+            Car selectedCar = carComboBox.getValue();
+            String updateFields ="";
+            if(! brandField.getText().isEmpty())
+                updateFields+="marka = '"+brandField.getText()+"', ";
+            if(! modelField.getText().isEmpty())
+                updateFields+="model = '"+modelField.getText()+"', ";
+            if(! categoryField.getText().isEmpty())
+                updateFields+="kategoria = '"+categoryField.getText()+"', ";
+            if(! yearField.getText().isEmpty())
+                updateFields+="rok = '"+yearField.getText()+"', ";
+            if(! registrationNumberField.getText().isEmpty())
+                updateFields+="numer_rejestracyjny = '"+registrationNumberField.getText()+"', ";
+            if(! mileageField.getText().isEmpty())
+                updateFields+="przebieg = '"+mileageField.getText()+"', ";
+            if(! dailyFeeField.getText().isEmpty())
+                updateFields+="dzienna_oplata = '"+dailyFeeField.getText()+"', ";
+            if(selectedCar != null && !updateFields.equals("")){
+                updateFields=updateFields.substring(0, updateFields.length()-2);
+                try (Connection conn = database.connect()) {
+                    database.update(selectedCar,updateFields);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                carComboBox.getSelectionModel().clearSelection();   
+                brandField.clear();
+                modelField.clear();
+                categoryField.clear();
+                yearField.clear();
+                registrationNumberField.clear();
+                mileageField.clear();
+                dailyFeeField.clear();
+            }
+            else{
+                Alert alert = new Alert(Alert.AlertType.ERROR, "missing fields");
+                alert.showAndWait();
+            }
+        });
         return carLayout;
     }
 
@@ -384,8 +456,9 @@ public class ClientApp extends Application {
         TextField costField = new TextField();
         Button addButton = new Button("Add car to service");
         Button deleteButton = new Button("Delete car from service");
-        
+        Button updateButton = new Button("Zaktualizuj dane");
 
+    
         form.add(carLabel, 0, 0);
         form.add(carComboBox, 1, 0);
         form.add(descriptionLabel, 0, 1);
@@ -396,6 +469,7 @@ public class ClientApp extends Application {
         form.add(serviceLabel,9,0);
         form.add(serviceComboBox,10,0);
         form.add(deleteButton,10,1);
+        form.add(updateButton,10,2);
 
         // Table for displaying car in service
         TableColumn<Service, String> brandColumn = new TableColumn<>("Marka");
@@ -480,6 +554,29 @@ public class ClientApp extends Application {
                 alert.showAndWait();
             }
         });
+        updateButton.setOnAction(e->{
+            Service selectedCar = serviceComboBox.getValue();
+            String updateFields ="";
+            if(! descriptionField.getText().isEmpty())
+                updateFields+="opis = '"+descriptionField.getText()+"', ";
+            if(! costField.getText().isEmpty())
+                updateFields+="koszt = '"+costField.getText()+"', ";
+            if(selectedCar != null && !updateFields.equals("")){
+                updateFields=updateFields.substring(0, updateFields.length()-2);
+                try (Connection conn = database.connect()) {
+                    database.update(selectedCar,updateFields);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                carComboBox.getSelectionModel().clearSelection();
+                descriptionField.clear();
+                costField.clear();
+            }
+            else{
+                Alert alert = new Alert(Alert.AlertType.ERROR, "missing fields");
+                alert.showAndWait();
+            }
+        });
         return serviceLayout;
     }
     // Create form and table for insurance
@@ -511,7 +608,7 @@ public class ClientApp extends Application {
         ComboBox<Insurance> insuranceComboBox = new ComboBox<>();
         insuranceComboBox.setItems(insuranceList);
         Button deleteButton= new Button("Usuń ubezpieczenie");
-        
+        Button updateButton = new Button("Zaktualizuj dane");
         
 
         form.add(carLabel, 0, 0);
@@ -529,7 +626,7 @@ public class ClientApp extends Application {
         form.add(addButton,0,6);
         form.add(insuranceComboBox,5,0);
         form.add(deleteButton,5,1);
-       
+        form.add(updateButton,5,2);
 
         TableColumn<Insurance, String> brandColumn = new TableColumn<>("Marka");
         brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
@@ -625,6 +722,38 @@ public class ClientApp extends Application {
                 alert.showAndWait();
             }
         });
+        updateButton.setOnAction(e->{
+            Insurance selectedInsurance = insuranceComboBox.getValue();
+            String updateFields ="";
+            if( typeComboBox.getValue() != null)
+                updateFields+="rodzaj = '"+typeComboBox.getValue()+"', ";
+            if( startDatePicker.getValue() != null)
+                updateFields+="data_rozpoczecia = '"+startDatePicker.getValue()+"', ";
+            if( endDatePicker.getValue() != null)
+                updateFields+="data_zakonczenia = '"+endDatePicker.getValue()+"', ";
+            if(! costField.getText().isEmpty())
+                updateFields+="koszt = '"+costField.getText()+"', ";
+            if(! companyField.getText().isEmpty())
+                updateFields+="nazwa_ubezpieczyciela = '"+companyField.getText()+"', ";
+            if(selectedInsurance != null && !updateFields.equals("")){
+                updateFields=updateFields.substring(0, updateFields.length()-2);
+                try (Connection conn = database.connect()) {
+                    database.update(selectedInsurance,updateFields);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                carComboBox.getSelectionModel().clearSelection();
+                typeComboBox.getSelectionModel().clearSelection();
+                startDatePicker.setValue(null);
+                endDatePicker.setValue(null);
+                costField.clear();
+                companyField.clear();
+            }
+            else{
+                Alert alert = new Alert(Alert.AlertType.ERROR, "missing fields");
+                alert.showAndWait();
+            }
+        });
         return insuranceLayout;
     }
         // Create form and table for opinion
@@ -654,7 +783,8 @@ public class ClientApp extends Application {
             ComboBox<Integer> gradeComboBox = new ComboBox<>();
             gradeComboBox.getItems().addAll(1,2,3,4,5);
             gradeComboBox.setPromptText("wybierz ocene");
-    
+            Button updateButton = new Button("Zaktualizuj dane");
+
             form.add(carLabel, 0, 0);
             form.add(carComboBox, 1, 0);
             form.add(clientLabel, 0, 1);
@@ -666,6 +796,7 @@ public class ClientApp extends Application {
             form.add(addButton,0,4);
             form.add(opinionComboBox,5,0);
             form.add(deleteButton,5,1);
+            form.add(updateButton,5,2);
     
             TableColumn<Opinion, String> brandColumn = new TableColumn<>("Marka");
             brandColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().brand));
@@ -759,6 +890,34 @@ public class ClientApp extends Application {
                     alert.showAndWait();
                 }
             });
+            updateButton.setOnAction(e->{
+                Opinion selectedOpinion = opinionComboBox.getValue();
+                String updateFields ="";
+                if( carComboBox.getValue() != null)
+                    updateFields+="id_samochodu = '"+carComboBox.getValue().id+"', ";
+                if( clientComboBox.getValue() != null)
+                    updateFields+="id_klienta = '"+clientComboBox.getValue().id+"', ";
+                if(! opinionField.getText().isEmpty())
+                    updateFields+="opinia = '"+opinionField.getText()+"', ";
+                if(gradeComboBox !=null)
+                    updateFields+="ocena = '"+gradeComboBox.getValue()+"', ";
+                if(selectedOpinion != null && !updateFields.equals("")){
+                    updateFields=updateFields.substring(0, updateFields.length()-2);
+                    try (Connection conn = database.connect()) {
+                        database.update(selectedOpinion,updateFields);
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                    carComboBox.getSelectionModel().clearSelection();
+                    clientComboBox.getSelectionModel().clearSelection();
+                    gradeComboBox.getSelectionModel().clearSelection();
+                    opinionField.clear();
+                }
+                else{
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "missing fields");
+                    alert.showAndWait();
+                }
+            });
             return opinionLayout;
         }
         // Create form and table for opinion
@@ -792,6 +951,7 @@ public class ClientApp extends Application {
             ComboBox<String> paymentMethodComboBox=new ComboBox<>();
             paymentMethodComboBox.getItems().addAll("Karta", "Gotowka");
             paymentMethodComboBox.setPromptText("Wybierz metode płatności");
+            
     
             form.add(startDateLabel, 0, 0);
             form.add(startDatePicker, 1, 0);

@@ -84,4 +84,15 @@ public class Database {
             e.printStackTrace();
         }
     }
+    public void update(Entity entity,String changes){
+        String query = "UPDATE " + entity.insertTable() + " SET " + changes + " WHERE "+ entity.condition();
+        try(PreparedStatement pst=this.connection.prepareStatement(query)){
+            pst.executeUpdate(); 
+            System.out.println("Data updated");
+        }
+        catch(SQLException e){
+            System.out.println("Error in updating data");
+            e.printStackTrace();
+        }
+    }
 }
