@@ -457,6 +457,7 @@ public class ClientApp extends Application {
         Button addButton = new Button("Add car to service");
         Button deleteButton = new Button("Delete car from service");
         Button updateButton = new Button("Zaktualizuj dane");
+        Button endServiceButton = new Button("Zakończ serwis");
 
     
         form.add(carLabel, 0, 0);
@@ -470,6 +471,7 @@ public class ClientApp extends Application {
         form.add(serviceComboBox,10,0);
         form.add(deleteButton,10,1);
         form.add(updateButton,10,2);
+        form.add(endServiceButton,10,3);
 
         // Table for displaying car in service
         TableColumn<Service, String> brandColumn = new TableColumn<>("Marka");
@@ -571,6 +573,25 @@ public class ClientApp extends Application {
                 carComboBox.getSelectionModel().clearSelection();
                 descriptionField.clear();
                 costField.clear();
+            }
+            else{
+                Alert alert = new Alert(Alert.AlertType.ERROR, "missing fields");
+                alert.showAndWait();
+            }
+        });
+        
+        endServiceButton.setOnAction(e->{
+            Service selectedCar = serviceComboBox.getValue();
+            if(selectedCar != null)
+            {
+                Car car= new Car(selectedCar.car_id);
+                String updateField ="status = 'dostepny'";
+                try (Connection conn = database.connect()) {
+                    database.update(car,updateField);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                carComboBox.getSelectionModel().clearSelection();
             }
             else{
                 Alert alert = new Alert(Alert.AlertType.ERROR, "missing fields");
