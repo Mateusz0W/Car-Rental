@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -48,6 +51,30 @@ public class Database {
         catch (SQLException e) {
             System.out.println("Error when inserting data");
             e.printStackTrace();
+        }
+    }
+    public void insertFromCsv(String filePath,String dataType){
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line=br.readLine()) != null) {
+                String []data=line.split(" ");
+                if(dataType.equals("Client")){
+                    if(data.length != 4){
+                        System.out.println("Error to many or to not enough data length in file");
+                        return;
+                    }
+                    insert(new Client(data[0],data[1],data[2],data[3]));
+                }
+                else if(dataType.equals("Car")){
+                    if(data.length != 7){
+                        System.out.println("Error to many or to not enough data length in file");
+                        return;
+                    }
+                    insert(new Car(data[0],data[1],data[2],Integer.parseInt(data[3]),data[4],Integer.parseInt(data[5]),Double.parseDouble(data[6])));
+                }
+            }
+        }catch(IOException e){
+            System.out.println("Csv file reading error");
         }
     }
     public ArrayList<ArrayList<String>> read(Entity entity){

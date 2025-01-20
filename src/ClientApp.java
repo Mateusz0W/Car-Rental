@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -19,6 +20,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class ClientApp extends Application {
@@ -49,8 +51,8 @@ public class ClientApp extends Application {
 
         // Menu tab
         TabPane tabPane = new TabPane();
-        Tab clientTab = new Tab("Klient", createClientForm());
-        Tab carTab = new Tab("Samochód", createCarForm());
+        Tab clientTab = new Tab("Klient", createClientForm(primaryStage));
+        Tab carTab = new Tab("Samochód", createCarForm(primaryStage));
         Tab serviceTab = new Tab("Serwis", createServiceForm());
         Tab insuranceTab = new Tab("Ubezpieczenia", createInsuranceForm());
         Tab opinionTab = new Tab("Opinie", createOpinionForm());
@@ -80,7 +82,7 @@ public class ClientApp extends Application {
     }
 
     // Create form and table for clients
-    private VBox createClientForm() {
+    private VBox createClientForm(Stage primaryStage) {
         GridPane form = new GridPane();
         form.setPadding(new Insets(10));
         form.setHgap(10);
@@ -100,6 +102,7 @@ public class ClientApp extends Application {
         clientComboBox.setPromptText("Wybierz klienta");
         Button deleteButton = new Button("Usuń Klienta");
         Button updateButton = new Button("Zaktualizuj dane");
+        Button chooseFileButton = new Button("Importuj dane z CSV");
 
         form.add(nameLabel, 0, 0);
         form.add(nameField, 1, 0);
@@ -113,6 +116,7 @@ public class ClientApp extends Application {
         form.add(clientComboBox,5,0);
         form.add(deleteButton,5,1);
         form.add(updateButton,5,2);
+        form.add(chooseFileButton,10,0);
 
         // Table for displaying clients
         TableColumn<Client, String> nameColumn = new TableColumn<>("Imię");
@@ -225,11 +229,29 @@ public class ClientApp extends Application {
                 alert.showAndWait();
             }
         });
+
+        chooseFileButton.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Wybierz plik CSV");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Pliki CSV", "*.csv"));
+
+            // Wybierz plik
+            File file = fileChooser.showOpenDialog(primaryStage);
+            if (file != null) {
+                try (Connection conn = database.connect()) {
+                    database.insertFromCsv(file.getAbsolutePath(),"Client");
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            } else {
+                System.out.println("Nie wybrano pliku.");
+            }
+        });
         return clientLayout;
     }
 
     // Create form and table for cars
-    private VBox createCarForm() {
+    private VBox createCarForm(Stage primaryStage) {
         GridPane form = new GridPane();
         form.setPadding(new Insets(10));
         form.setHgap(10);
@@ -255,6 +277,7 @@ public class ClientApp extends Application {
         carComboBox.setPromptText("Wybierz samochód");
         Button deleteButton = new Button("Usuń Samochód");
         Button updateButton = new Button("Zaktualizuj dane");
+        Button chooseFileButton = new Button("Importuj dane z CSV");
 
         form.add(barndLabel, 0, 0);
         form.add(brandField, 1, 0);
@@ -274,6 +297,7 @@ public class ClientApp extends Application {
         form.add(carComboBox,5,0);
         form.add(deleteButton,5,1);
         form.add(updateButton,5,2);
+        form.add(chooseFileButton,10,0);
 
         // Table for displaying cars
         TableColumn<Car, String> makeColumn = new TableColumn<>("Marka");
@@ -432,6 +456,23 @@ public class ClientApp extends Application {
             else{
                 Alert alert = new Alert(Alert.AlertType.ERROR, "missing fields");
                 alert.showAndWait();
+            }
+        });
+        chooseFileButton.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Wybierz plik CSV");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Pliki CSV", "*.csv"));
+
+            // Wybierz plik
+            File file = fileChooser.showOpenDialog(primaryStage);
+            if (file != null) {
+                try (Connection conn = database.connect()) {
+                    database.insertFromCsv(file.getAbsolutePath(),"Car");
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            } else {
+                System.out.println("Nie wybrano pliku.");
             }
         });
         return carLayout;
