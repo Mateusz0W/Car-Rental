@@ -86,17 +86,18 @@ public class ClientApp extends Application {
         form.setHgap(10);
         form.setVgap(10);
 
-        Label nameLabel = new Label("Name:");
+        Label nameLabel = new Label("Imię:");
         TextField nameField = new TextField();
-        Label surnameLabel = new Label("Surname:");
+        Label surnameLabel = new Label("Nazwisko:");
         TextField surnameField = new TextField();
-        Label phoneLabel = new Label("Phone Number:");
+        Label phoneLabel = new Label("Numer telefonu:");
         TextField phoneField = new TextField();
         Label emailLabel = new Label("Email:");
         TextField emailField = new TextField();
-        Button addButton = new Button("Add Client");
+        Button addButton = new Button("Dodaj Klienta");
         ComboBox<Client> clientComboBox = new ComboBox<>();
         clientComboBox.setItems(clientList); 
+        clientComboBox.setPromptText("Wybierz klienta");
         Button deleteButton = new Button("Usuń Klienta");
         Button updateButton = new Button("Zaktualizuj dane");
 
@@ -114,13 +115,13 @@ public class ClientApp extends Application {
         form.add(updateButton,5,2);
 
         // Table for displaying clients
-        TableColumn<Client, String> nameColumn = new TableColumn<>("Name");
+        TableColumn<Client, String> nameColumn = new TableColumn<>("Imię");
         nameColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().name));
 
-        TableColumn<Client, String> surnameColumn = new TableColumn<>("Surname");
+        TableColumn<Client, String> surnameColumn = new TableColumn<>("Nazwisko");
         surnameColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().surname));
 
-        TableColumn<Client, String> phoneColumn = new TableColumn<>("Phone Number");
+        TableColumn<Client, String> phoneColumn = new TableColumn<>("Numer telefonu");
         phoneColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().phone_number));
 
         TableColumn<Client, String> emailColumn = new TableColumn<>("Email");
@@ -154,7 +155,7 @@ public class ClientApp extends Application {
             }
         });
         
-        Button refreshButton = new Button("Refresh Clients");
+        Button refreshButton = new Button("Odśwież klientów");
         VBox clientLayout = new VBox(10);
         clientLayout.setPadding(new Insets(10));
         clientLayout.getChildren().addAll(form, refreshButton, clientTableView);
@@ -248,9 +249,10 @@ public class ClientApp extends Application {
         TextField mileageField = new TextField();
         Label dailyFeeLabel = new Label("dzienna_oplata:");
         TextField dailyFeeField = new TextField();
-        Button addButton = new Button("Add Car");
+        Button addButton = new Button("Dodaj Samochód");
         ComboBox<Car> carComboBox = new ComboBox<>();
         carComboBox.setItems(carList);
+        carComboBox.setPromptText("Wybierz samochód");
         Button deleteButton = new Button("Usuń Samochód");
         Button updateButton = new Button("Zaktualizuj dane");
 
@@ -343,7 +345,7 @@ public class ClientApp extends Application {
             }
         });
 
-        Button refreshCarsButton = new Button("Refresh Cars");
+        Button refreshCarsButton = new Button("Odśwież Samochody");
         VBox carLayout = new VBox(10);
         carLayout.setPadding(new Insets(10));
         carLayout.getChildren().addAll(form,refreshCarsButton ,carTableView);
@@ -447,15 +449,17 @@ public class ClientApp extends Application {
         ComboBox<Service> serviceComboBox = new ComboBox<>();
         Label serviceLabel = new Label("Service");
         carComboBox.setItems(carList); // Populate ComboBox with the car list
+        carComboBox.setPromptText("Wybierz samochód");
         serviceComboBox.setItems(serviceList);
+        serviceComboBox.setPromptText("Wybierz samochód z serwisu");
 
 
         Label descriptionLabel = new Label("opis:");
         TextField descriptionField = new TextField();
         Label costLabel = new Label("koszt serwisu:");
         TextField costField = new TextField();
-        Button addButton = new Button("Add car to service");
-        Button deleteButton = new Button("Delete car from service");
+        Button addButton = new Button("Dodaj samochód");
+        Button deleteButton = new Button("Usuń samochód z serwisu");
         Button updateButton = new Button("Zaktualizuj dane");
         Button endServiceButton = new Button("Zakończ serwis");
 
@@ -516,7 +520,7 @@ public class ClientApp extends Application {
             }
         });
 
-        Button refreshButton = new Button("Refresh Service");
+        Button refreshButton = new Button("Odśwież serwis");
         VBox serviceLayout = new VBox(10);
         serviceLayout.setPadding(new Insets(10));
         serviceLayout.getChildren().addAll(form, refreshButton, serviceTableView);
@@ -610,9 +614,7 @@ public class ClientApp extends Application {
         Label carLabel = new Label("Car:");
         ComboBox<Car> carComboBox = new ComboBox<>();
         carComboBox.setItems(carList); // Populate ComboBox with the car list
-      
-
-
+        carComboBox.setPromptText("Wybierz samochód");
         Label typeLabel = new Label("Rodzaj:");
         ComboBox<String> typeComboBox = new ComboBox<>();
         typeComboBox.getItems().addAll("OC", "AC", "Assistance", "Full");
@@ -625,9 +627,10 @@ public class ClientApp extends Application {
         TextField costField = new TextField();
         Label companyLabel = new Label("firma:");
         TextField companyField = new TextField();
-        Button addButton = new Button("Buy insurance for car");
+        Button addButton = new Button("Wykup ubezpieczenie");
         ComboBox<Insurance> insuranceComboBox = new ComboBox<>();
         insuranceComboBox.setItems(insuranceList);
+        insuranceComboBox.setPromptText("Wybierz ubezpieczenie");
         Button deleteButton= new Button("Usuń ubezpieczenie");
         Button updateButton = new Button("Zaktualizuj dane");
         
@@ -703,7 +706,7 @@ public class ClientApp extends Application {
             }
         });
 
-        Button refreshButton = new Button("Refresh Insurance");
+        Button refreshButton = new Button("Odśwież ubezpieczenia");
         VBox insuranceLayout = new VBox(10);
         insuranceLayout.setPadding(new Insets(10));
         insuranceLayout.getChildren().addAll(form, refreshButton, insuranceTableView);
@@ -797,13 +800,14 @@ public class ClientApp extends Application {
             opinionField.setPromptText("Wpisz opinie");
             Button addButton = new Button("Dodaj opinie");
             ComboBox<Opinion> opinionComboBox = new ComboBox<>();
+            opinionComboBox.setPromptText("Wybierz opinie");
             opinionComboBox.setItems(opinionList);
             Button deleteButton = new Button("Usun opinie");
 
             Label gradeLabel = new Label("Ocena:");
             ComboBox<Integer> gradeComboBox = new ComboBox<>();
             gradeComboBox.getItems().addAll(1,2,3,4,5);
-            gradeComboBox.setPromptText("wybierz ocene");
+            gradeComboBox.setPromptText("wybierz ocenę");
             Button updateButton = new Button("Zaktualizuj dane");
 
             form.add(carLabel, 0, 0);
@@ -872,7 +876,7 @@ public class ClientApp extends Application {
                 }
             });
     
-            Button refreshButton = new Button("Refresh Insurance");
+            Button refreshButton = new Button("Odśwież opinie");
             VBox opinionLayout = new VBox(10);
             opinionLayout.setPadding(new Insets(10));
             opinionLayout.getChildren().addAll(form, refreshButton, opinionTableView);
@@ -966,6 +970,7 @@ public class ClientApp extends Application {
             Label costLabel = new Label("Całkowity koszt "+cost);
             Button addButton = new Button("Wypożycz");
             ComboBox<Booking> bookingComboBox = new ComboBox<>();
+            bookingComboBox.setPromptText("Wybierz rezerwację");
             bookingComboBox.setItems(bookingList);
             Button deleteButton = new Button("Usuń");
 
@@ -1092,7 +1097,7 @@ public class ClientApp extends Application {
                     alert.showAndWait();
                 }
             });
-            Button refreshButton = new Button("Refresh booking");
+            Button refreshButton = new Button("Odśwież rezerwacje");
             VBox bookingLayout = new VBox(10);
             bookingLayout.setPadding(new Insets(10));
             bookingLayout.getChildren().addAll(form, refreshButton, bookingTableView);
