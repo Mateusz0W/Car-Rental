@@ -381,7 +381,7 @@ public class ClientApp extends Application {
                 ArrayList<ArrayList<String>> rows = database.read(new Car()); // Dummy car to fetch data
             
                 for (ArrayList<String> row : rows) {
-                    if (row.size() == 9) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                    if (row.size() == 9) { 
                         Car car = new Car(row.get(0),
                          row.get(1), 
                          row.get(2), 
@@ -572,7 +572,7 @@ public class ClientApp extends Application {
                 System.out.println("Connected to database!");
                 ArrayList<ArrayList<String>> rows = database.read(new Service()); // Dummy service to fetch data
                 for (ArrayList<String> row : rows) {
-                    if (row.size() == 6) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                    if (row.size() == 6) { 
                         Service service = new Service(row.get(0), row.get(1),Integer.parseInt( row.get(2)), row.get(3),Double.parseDouble( row.get(4)),Integer.parseInt(row.get(5)));
                         serviceList.add(service);
                     }
@@ -708,13 +708,16 @@ public class ClientApp extends Application {
         TableColumn<Insurance, LocalDate> endDateColumn = new TableColumn<>("Data zakończenia");
         endDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().end_date));
 
+        TableColumn<Insurance, InsuranceType> typeColumn = new TableColumn<>("Typ");
+        typeColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().type));
+
         TableColumn<Insurance, Double> costColumn = new TableColumn<>("koszt");
         costColumn.setCellValueFactory(data ->new javafx.beans.property.SimpleDoubleProperty(data.getValue().cost).asObject());
 
         TableColumn<Insurance, String> companyColumn = new TableColumn<>("firma");
         companyColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().company));
 
-        insuranceTableView.getColumns().addAll(brandColumn, modelColumn, registrationNumberColumn, startDateColumn, endDateColumn,costColumn,companyColumn);
+        insuranceTableView.getColumns().addAll(brandColumn, modelColumn, registrationNumberColumn, startDateColumn, endDateColumn,typeColumn,costColumn,companyColumn);
         insuranceTableView.setItems(insuranceList);
 
         addButton.setOnAction(e -> {
@@ -758,7 +761,7 @@ public class ClientApp extends Application {
                 System.out.println("Connected to database!");
                 ArrayList<ArrayList<String>> rows = database.read(new Insurance()); // Dummy insurance to fetch data
                 for (ArrayList<String> row : rows) {
-                    if (row.size() == 9) { // Upewnij się, że wiersz ma odpowiednią liczbę kolumn
+                    if (row.size() == 9) { 
                         Insurance insurance = new Insurance(row.get(0), row.get(1),row.get(2),LocalDate.parse(row.get(3)),LocalDate.parse(row.get(4)),InsuranceType.valueOf( row.get(5)),Double.parseDouble( row.get(6)),row.get(7),Integer.parseInt(row.get(8)));
                         insuranceList.add(insurance);
                     }
