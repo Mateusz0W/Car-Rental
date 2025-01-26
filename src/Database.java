@@ -57,7 +57,7 @@ public class Database {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line=br.readLine()) != null) {
-                String []data=line.split(" ");
+                String []data=line.split(", ");
                 if(dataType.equals("Client")){
                     if(data.length != 4){
                         System.out.println("Error to many or to not enough data length in file");
