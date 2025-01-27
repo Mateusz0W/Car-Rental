@@ -47,7 +47,7 @@ public class ClientApp extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        primaryStage.setTitle("Client and Car Management");
+        primaryStage.setTitle("Wypożyczalnia samochodów");
 
         // Menu tab
         TabPane tabPane = new TabPane();
@@ -485,10 +485,10 @@ public class ClientApp extends Application {
         form.setHgap(10);
         form.setVgap(10);
 
-        Label carLabel = new Label("Car:");
+        Label carLabel = new Label("Samochód:");
         ComboBox<Car> carComboBox = new ComboBox<>();
         ComboBox<Service> serviceComboBox = new ComboBox<>();
-        Label serviceLabel = new Label("Service");
+        Label serviceLabel = new Label("Serwis");
         carComboBox.setItems(carList); // Populate ComboBox with the car list
         carComboBox.setPromptText("Wybierz samochód");
         serviceComboBox.setItems(serviceList);
@@ -652,7 +652,7 @@ public class ClientApp extends Application {
         form.setHgap(10);
         form.setVgap(10);
 
-        Label carLabel = new Label("Car:");
+        Label carLabel = new Label("Samochód:");
         ComboBox<Car> carComboBox = new ComboBox<>();
         carComboBox.setItems(carList); // Populate ComboBox with the car list
         carComboBox.setPromptText("Wybierz samochód");
@@ -831,7 +831,7 @@ public class ClientApp extends Application {
             form.setHgap(10);
             form.setVgap(10);
     
-            Label carLabel = new Label("Car:");
+            Label carLabel = new Label("Samochód:");
             ComboBox<Car> carComboBox = new ComboBox<>();
             carComboBox.setItems(carList); // Populate ComboBox with the car list
             carComboBox.setPromptText("Wybierz samochód");
