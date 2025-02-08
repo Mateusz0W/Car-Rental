@@ -52,7 +52,7 @@ Supports Create, Read, Update, and Delete operations for:
 - Display income plots based on rental transactions.  
 
 ## Technologies Used
-- **Backend:** Java (JDBC for PostgreSQL)  
+- **Backend:** Java (JDBC)  
 - **Frontend:** JavaFX  
 - **Database:** PostgreSQL  
 - **Advanced Database Features:**  
